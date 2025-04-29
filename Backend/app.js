@@ -1,17 +1,23 @@
-
-const dotenv =require('dotenv');
-dotenv.config();
+const dotenv = require('dotenv');
+dotenv.config(); // Loads environment variables
 
 const express = require("express");
 const cors = require("cors");
-const app = express();
 
+const app = express(); // Creates an Express app
+app.use(cors());       // Enables Cross-Origin Resource Sharing
 
-app.use(cors());
+const connectToDb = require('./db/db'); // Connects to database
+const userRoutes = require('./routes/user.routes'); // Imports user routes
 
-app.get('/',(req,res)=>{
-    res.send('Hello World!')
+connectToDb();
+app.use(express.json()); // Parses incoming JSON data
+app.use(express.urlencoded({ extended: true })); // ✅ Fixed syntax
+
+app.get('/', (req, res) => {
+    res.send('Hello World!'); // Test route
 });
 
-module.exports = app;
+app.use('/users', userRoutes); // Mounts user routes
 
+module.exports = app; // Exports the app for use in server.js
