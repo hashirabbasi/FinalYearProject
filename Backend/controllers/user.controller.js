@@ -1,8 +1,9 @@
 const userModel = require('../models/user.model');
 const userService = require('../services/user.service');
 const { validationResult } = require('express-validator');
+const blacklistTokenModel = require('../models/blacklistTokken.model');
 
-module.exports.registerUser = async (req, res, next) => {
+module.exports.registerUser = async (req, res) => {
     try {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
@@ -15,17 +16,17 @@ module.exports.registerUser = async (req, res, next) => {
             return res.status(400).json({ error: "Full name is required" });
         }
 
-        const { firstname, lastname } = fullName;
         const hashedPassword = await userModel.hashPassword(password);
 
         const user = await userService.createUser({
-            firstname,
-            lastname,
+            firstname: fullName.firstname,
+            lastname: fullName.lastname,
             email,
-            password: hashedPassword
+            password: hashedPassword,
         });
 
         const token = user.generateAuthToken();
+        res.cookie('token', token, { httpOnly: true });
         res.status(201).json({ token, user });
 
     } catch (error) {
@@ -34,7 +35,7 @@ module.exports.registerUser = async (req, res, next) => {
     }
 };
 
-module.exports.loginUser = async (req, res, next) => {
+module.exports.loginUser = async (req, res) => {
     try {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
@@ -54,6 +55,7 @@ module.exports.loginUser = async (req, res, next) => {
         }
 
         const token = user.generateAuthToken();
+        res.cookie('token', token, { httpOnly: true });
         res.status(200).json({ token, user });
 
     } catch (error) {
@@ -62,18 +64,20 @@ module.exports.loginUser = async (req, res, next) => {
     }
 };
 
+module.exports.getUserProfile = async (req, res) => {
+    res.status(200).json({ user: req.user });
+};
 
-module.exports.getUserProfile = async (req, res, next) => {
+module.exports.logoutUser = async (req, res) => {
     try {
-        const userId = req.user._id; // Assuming you have middleware to set req.user
-        const user = await userModel.findById(userId).select('-password');
-        if (!user) {
-            return res.status(404).json({ error: "User not found" });
+        const token = req.cookies.token || (req.headers.authorization && req.headers.authorization.split(' ')[1]);
+        if (token) {
+            await blacklistTokenModel.create({ token });
         }
-        res.status(200).json(user);
+        res.clearCookie('token');
+        res.status(200).json({ message: 'Logged out successfully' });
     } catch (error) {
-        console.error('Error fetching user profile:', error);
+        console.error('Error logging out user:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
 };
-

@@ -9,10 +9,13 @@ app.use(cors());       // Enables Cross-Origin Resource Sharing
 
 const connectToDb = require('./db/db'); // Connects to database
 const userRoutes = require('./routes/user.routes'); // Imports user routes
+const cokkies = require('cookie-parser'); // Parses cookies
 
 connectToDb();
 app.use(express.json()); // Parses incoming JSON data
 app.use(express.urlencoded({ extended: true })); // ✅ Fixed syntax
+app.use(cokkies()); // Parses cookies
+
 
 app.get('/', (req, res) => {
     res.send('Hello World!'); // Test route
