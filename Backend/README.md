@@ -224,6 +224,163 @@ Logs out the authenticated user by blacklisting the JWT token and clearing the a
 
 ## Notes
 
+
 - After logout, the token is blacklisted and cannot be used again.
 - The authentication cookie is cleared.
 - Only accessible to authenticated users.
+
+# Worker Login Endpoint Documentation
+
+## Endpoint
+
+`POST /workers/login`
+
+## Description
+
+Authenticates a worker with their email and password. If the credentials are valid, returns a JWT authentication token and the worker object.
+
+## Request Body
+
+Send a JSON object with the following structure:
+
+```
+{
+  "email": "string (valid email, required)",
+  "password": "string (min 6 chars, required)"
+}
+```
+
+### Example
+
+```
+{
+  "email": "worker@example.com",
+  "password": "securePassword123"
+}
+```
+
+## Response
+
+- **200 OK**: Login successful. Returns a JSON object with a token and worker data.
+- **400 Bad Request**: Validation failed or incorrect credentials. Returns an array of error messages.
+- **500 Internal Server Error**: Server error occurred.
+
+### Success Response Example
+
+```
+{
+  "token": "<jwt_token>",
+  "worker": {
+    "_id": "...",
+    "fullname": { "firstname": "Jane", "lastname": "Smith" },
+    "email": "worker@example.com"
+    // ...other fields
+  }
+}
+```
+
+### Error Response Example
+
+```
+{
+  "errors": [
+    { "msg": "Invalid email", "param": "email", ... }
+  ]
+}
+```
+
+## Notes
+
+- Both fields are required and must be valid.
+- Returns a JWT token for authentication upon successful login.
+- If credentials are incorrect, a generic error message is returned.
+
+---
+
+# Worker Profile Endpoint Documentation
+
+## Endpoint
+
+`GET /workers/profile`
+
+## Description
+
+Retrieves the authenticated worker's profile information. Requires a valid JWT token (sent via cookie or Authorization header).
+
+## Authentication
+
+- Requires JWT token in `Cookie: token=<jwt_token>` or `Authorization: Bearer <jwt_token>` header.
+
+## Response
+
+- **200 OK**: Returns the worker object.
+- **401 Unauthorized**: If the token is missing, invalid, expired, or blacklisted.
+
+### Success Response Example
+
+```
+{
+  "worker": {
+    "_id": "...",
+    "fullname": { "firstname": "Jane", "lastname": "Smith" },
+    "email": "worker@example.com"
+    // ...other fields
+  }
+}
+```
+
+### Error Response Example
+
+```
+{
+  "error": "Unauthorized - Invalid or expired token"
+}
+```
+
+## Notes
+
+- Only accessible to authenticated workers.
+- Returns the current worker's profile data.
+
+---
+
+# Worker Logout Endpoint Documentation
+
+## Endpoint
+
+`GET /workers/logout`
+
+## Description
+
+Logs out the authenticated worker by blacklisting the JWT token and clearing the authentication cookie.
+
+## Authentication
+
+- Requires JWT token in `Cookie: token=<jwt_token>` or `Authorization: Bearer <jwt_token>` header.
+
+## Response
+
+- **200 OK**: Logout successful.
+- **401 Unauthorized**: If the token is missing, invalid, expired, or blacklisted.
+
+### Success Response Example
+
+```
+{
+  "message": "Logged out successfully"
+}
+```
+
+### Error Response Example
+
+```
+{
+  "error": "Unauthorized - Invalid or expired token"
+}
+```
+
+## Notes
+
+- After logout, the token is blacklisted and cannot be used again.
+- The authentication cookie is cleared.
+- Only accessible to authenticated workers.

@@ -11,6 +11,7 @@ const workerSchema = new mongoose.Schema({
         },
         lastname: {
             type: String,
+            required: true,
             minlength: [3, 'Lastname must be at least 3 characters long'],
         }
     },
@@ -64,10 +65,11 @@ workerSchema.pre('save', async function (next) {
 
 // 🔐 JWT token
 workerSchema.methods.generateAuthToken = function () {
-    const token = jwt.sign({ _id: this._id, role: 'worker' }, process.env.JWT_SECRET, {
-        expiresIn: '24h',
-    });
-    return token;
+    return jwt.sign(
+        { _id: this._id, role: 'worker' },
+        process.env.JWT_SECRET,
+        { expiresIn: '24h' }
+    );
 };
 
 // 🔐 Compare password

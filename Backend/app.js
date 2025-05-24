@@ -9,6 +9,7 @@ app.use(cors());       // Enables Cross-Origin Resource Sharing
 
 const connectToDb = require('./db/db'); // Connects to database
 const userRoutes = require('./routes/user.routes'); // Imports user routes
+const workerRoutes = require('./routes/worker.routes'); // Imports worker routes
 const cokkies = require('cookie-parser'); // Parses cookies
 
 connectToDb();
@@ -22,5 +23,5 @@ app.get('/', (req, res) => {
 });
 
 app.use('/users', userRoutes); // Mounts user routes
-
+app.use('/workers', workerRoutes); // Mounts worker routes
 module.exports = app; // Exports the app for use in server.js
