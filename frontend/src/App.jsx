@@ -1,0 +1,24 @@
+import { Routes, Route } from 'react-router-dom'
+import Home from './pages/Home'
+import UserLogin from './pages/userLogin'
+import UserSignUp from './pages/UserSignUp'
+import WorkerLogin from './pages/Workerlogin'
+import WorkerSignUp from './pages/WorkerSignUp'
+import React from 'react'
+
+
+function App() {
+  return (
+    <div>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/userLogin" element={<UserLogin />} />
+        <Route path="/userSignUp" element={<UserSignUp />} />
+        <Route path="/workerLogin" element={<WorkerLogin />} />
+        <Route path="/workerSignUp" element={<WorkerSignUp />} />
+      </Routes>
+    </div>
+  )
+}
+
+export default App
