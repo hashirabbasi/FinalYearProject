@@ -6,9 +6,15 @@ const blacklistTokenModel = require('../models/blacklistTokken.model');
 exports.authUser = async (req, res, next) => {
   try {
     const token = req.cookies.token || (req.headers.authorization && req.headers.authorization.split(' ')[1]);
+    console.log('Auth middleware token:', token);
+
     if (!token) return res.status(401).json({ error: 'No token provided' });
+
     const blacklisted = await blacklistTokenModel.findOne({ token });
-    if (blacklisted) return res.status(401).json({ error: 'Token is blacklisted' });
+    if (blacklisted) {
+      console.log('Token is blacklisted:', token);
+      return res.status(401).json({ error: 'Token is blacklisted' });
+    }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET || 'default_secret');
     const user = await userModel.findById(decoded._id);
@@ -17,6 +23,7 @@ exports.authUser = async (req, res, next) => {
     req.user = user;
     next();
   } catch (err) {
+    console.log('Auth middleware error:', err.message);
     return res.status(401).json({ error: 'Unauthorized - Invalid or expired token' });
   }
 };

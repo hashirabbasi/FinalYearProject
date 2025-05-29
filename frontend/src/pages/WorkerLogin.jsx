@@ -1,38 +1,44 @@
-import React from "react";
-import { Link } from "react-router-dom";
-import { useState } from "react";
+import React, { useState, useContext } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
+import { WorkerDataContext } from "../context/WorkerContext";
 
 const Workerlogin = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const { setWorker } = useContext(WorkerDataContext);
+  const navigate = useNavigate();
 
-  const [userDate, setUserDate] = useState({});
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    try {
+      const userData = { email, password };
+      const response = await axios.post(
+        `${import.meta.env.VITE_BASE_URL}/workers/login`,
+        userData
+      );
 
-    setUserDate({
-      email: email,
-      password: password,
-    });
+      if (response.status === 200) {
+        const data = response.data;
+        setWorker(data.worker);
+        localStorage.setItem("token", data.token);
+        navigate("/Worker-Home");
+      }
+    } catch (error) {
+      alert("Login failed. Check your credentials.");
+    }
 
     setEmail("");
     setPassword("");
   };
 
   return (
-    // change image in  your image path
     <div className="p-7 h-screen flex flex-col justify-between ">
       <div>
         <img className=" w-20 mb-10" src="image.png" alt="" />
 
-        <form
-          onSubmit={(e) => {
-            handleSubmit(e);
-          }}
-        >
+        <form onSubmit={handleSubmit}>
           <h3 className="text-lg font-medium mb-2">what's your email</h3>
-
           <input
             type="email"
             placeholder="Enter your email"
@@ -56,7 +62,7 @@ const Workerlogin = () => {
           </button>
         </form>
         <p className="text-center">
-          Join here!    {"  "}
+          Join here! {"  "}
           <Link to="/WorkerSignUp" className="text-blue-600">
             <b> Register as a Worker{" "}</b>
           </Link>
@@ -68,7 +74,7 @@ const Workerlogin = () => {
           to="/UserLogin"
           className="bg-[#d5622d] flex items-center justify-center  text-white font-semibold mb-5 rounded px-4 py-2  w-full text-lg placeholder:text-base"
         >
-          Singn In as User
+          Sign In as User
         </Link>
       </div>
     </div>

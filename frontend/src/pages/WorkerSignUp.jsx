@@ -1,101 +1,149 @@
-import React from 'react'
-import { Link } from 'react-router-dom'
-import { useState } from 'react'
+import React, { useState, useContext } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import { WorkerDataContext } from '../context/WorkerContext';
 
-export const WorkerSignUp = () => {
-      const [email, setEmail] = useState("");
+const WorkerSignUp = () => {
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [firstname, setFirstName] = useState("");
   const [lastname, setLastName] = useState("");
-  const [userDate, setUserDate] = useState({});
+  const [phone, setPhone] = useState("");
+  const [serviceType, setServiceType] = useState("");
+  const [experience, setExperience] = useState("");
+  const { setWorker } = useContext(WorkerDataContext);
+  const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setUserDate({
-      fullName:{
-      firstname: firstname,
-      lastname: lastname,
-       },
-      email: email,
-      password: password,
-    })
-    setEmail("");
-    setPassword("");
-    setFirstName("");
-    setLastName("");
 
-  }
+    const newWorker = {
+      firstname,
+      lastname,
+      email,
+      password,
+      phone,
+      serviceType,
+      experience,
+      status: "inactive", // Required by backend validator
+    };
 
-   return (
-  <div className="p-7 h-screen flex flex-col justify-between ">
+    try {
+      const res = await axios.post(
+        `${import.meta.env.VITE_BASE_URL}/workers/register`,
+        newWorker
+      );
+
+      if (res.status === 201) {
+        alert("Registered successfully! Please wait for admin approval.");
+        // Do NOT set token or setWorker here
+        navigate('/workerLogin');
+      }
+
+      // Clear form fields
+      setEmail("");
+      setPassword("");
+      setFirstName("");
+      setLastName("");
+      setPhone("");
+      setServiceType("");
+      setExperience("");
+    } catch (err) {
+      const errorMsg =
+        err.response?.data?.errors?.[0]?.msg ||
+        err.response?.data?.message ||
+        "Registration failed";
+      alert(errorMsg);
+      console.error("Registration failed:", err.response?.data || err.message);
+    }
+  };
+
+  return (
+    <div className="p-7 h-screen flex flex-col justify-between bg-gray-50">
       <div>
-        <img className=" w-16 mb-10" src="image.png" alt="" />
-
-        <form
-          onSubmit={(e) => {
-            handleSubmit(e);
-          }}
-        >
-
-                 <h3 className="text-base font-medium mb-2">what's our Worker Name</h3>
-         <div className='flex gap-4 mb-5 '>
-           <input
+        <img className="w-16 mb-10" src="/image.png" alt="Logo" />
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <input
             type="text"
-            placeholder="Enter your First name"
-            required
+            placeholder="First Name"
             value={firstname}
             onChange={(e) => setFirstName(e.target.value)}
-            className="bg-[#eeeeee] w-1/2  rounded px-4 py-2 border  text-base placeholder:text-base"
-          />
-           <input
-            type="text"
-            placeholder="Enter your Last name"
+            className="border px-4 py-2 w-full rounded"
             required
+          />
+          <input
+            type="text"
+            placeholder="Last Name"
             value={lastname}
             onChange={(e) => setLastName(e.target.value)}
-            className="bg-[#eeeeee] w-1/2  rounded px-4 py-2 border  text-base placeholder:text-base"
+            className="border px-4 py-2 w-full rounded"
+            required
           />
-         </div>
-
-
-
-          <h3 className="text-base font-medium mb-2">what's your email</h3>
-
           <input
             type="email"
-            placeholder="Enter your email"
-            required
+            placeholder="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="bg-[#eeeeee] mb-5 rounded px-4 py-2 border w-full text-base placeholder:text-base"
+            className="border px-4 py-2 w-full rounded"
+            required
           />
-
-          <h3 className="text-base font-medium mb-2">what's your password</h3>
           <input
             type="password"
-            placeholder="Enter your password"
-            required
+            placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="bg-[#eeeeee] mb-5 rounded px-4 py-2 border w-full text-base placeholder:text-base"
+            className="border px-4 py-2 w-full rounded"
+            required
           />
-          <button className="bg-[#111] text-white font-semibold mb-3 rounded px-4 py-2  w-full text-lg ">
+          <input
+            type="text"
+            placeholder="Phone"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            className="border px-4 py-2 w-full rounded"
+            required
+          />
+          <select
+            value={serviceType}
+            onChange={(e) => setServiceType(e.target.value)}
+            className="border px-4 py-2 w-full rounded"
+            required
+          >
+            <option value="">Select Service Type</option>
+            <option value="plumber">Plumber</option>
+            <option value="electrician">Electrician</option>
+            <option value="carpenter">Carpenter</option>
+            <option value="cleaner">Cleaner</option>
+            <option value="painter">Painter</option>
+            <option value="other">Other</option>
+          </select>
+          <input
+            type="number"
+            placeholder="Years of Experience"
+            value={experience}
+            onChange={(e) => setExperience(e.target.value)}
+            className="border px-4 py-2 w-full rounded"
+            required
+          />
+
+          <button type="submit" className="bg-[#111] text-white font-semibold mb-3 rounded px-4 py-2 w-full text-lg">
             Create Account
           </button>
         </form>
-        <p className="text-center">
-          already have an account?{" "}
-          <Link to="/workerLogin" className="text-blue-600">
-           <b> Login here {" "}</b>
+        <p className="text-center mt-2">
+          Already have an account?{" "}
+          <Link to="/workerLogin" className="text-blue-600 font-bold">
+            Login here
           </Link>
         </p>
       </div>
-
       <div>
-       <p className='text-[8px] leading-tight'> Lorem  Lorem ipsum, dolor sit amet consectetur adipisicing elit. Officiis omnis magni quae vitae porro error modi ipsum, est illo nostrum! Eaque adipisci illum ea. Dolor itaque harum corrupti quis et.ipsum, dolor sit amet consectetur adipisicing elit. Unde omnis veritatis eligendi sit totam ab saepe voluptates! Aperiam adipisci deserunt molestiae! Excepturi eaque laborum hic nam! Quam eius nisi ullam.</p>
+        <p className='text-[10px] text-center leading-tight text-gray-600'>
+          By signing up, you agree to our terms and conditions.
+        </p>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default WorkerSignUp
+export default WorkerSignUp;

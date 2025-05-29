@@ -1,27 +1,33 @@
 const dotenv = require('dotenv');
-dotenv.config(); // Loads environment variables
+dotenv.config(); // Load environment variables
 
 const express = require("express");
 const cors = require("cors");
+const cookieParser = require('cookie-parser');
+const connectToDb = require('./db/db');
 
-const app = express(); // Creates an Express app
-app.use(cors());       // Enables Cross-Origin Resource Sharing
+const userRoutes = require('./routes/user.routes');
+const workerRoutes = require('./routes/worker.routes');
+const adminRoutes = require('./routes/admin.routes');
 
-const connectToDb = require('./db/db'); // Connects to database
-const userRoutes = require('./routes/user.routes'); // Imports user routes
-const workerRoutes = require('./routes/worker.routes'); // Imports worker routes
-const cokkies = require('cookie-parser'); // Parses cookies
+const app = express();
 
+// Middleware
+app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
+
+// Connect to database
 connectToDb();
-app.use(express.json()); // Parses incoming JSON data
-app.use(express.urlencoded({ extended: true })); // ✅ Fixed syntax
-app.use(cokkies()); // Parses cookies
 
-
+// Routes
 app.get('/', (req, res) => {
-    res.send('Hello World!'); // Test route
+  res.send('Hello World!');
 });
 
-app.use('/users', userRoutes); // Mounts user routes
-app.use('/workers', workerRoutes); // Mounts worker routes
-module.exports = app; // Exports the app for use in server.js
+app.use('/users', userRoutes);
+app.use('/workers', workerRoutes);
+app.use('/admin', adminRoutes); // Mount admin routes here
+
+module.exports = app;
