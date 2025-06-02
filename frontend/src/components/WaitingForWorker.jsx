@@ -1,16 +1,25 @@
 import React from 'react'
 
-const WaitingForWorker = () => {
+const WaitingForWorker = (props) => {
   return (
     <div>
       <h5
         className="p-1 text-center w-[93%] absolute top-0"
-        onClick={() => props.setWorkerPannel(false)}
+        onClick={() => props.WaitingForWorker(false)}
       >
         <i className="text-3xl text-gray-400 ri-arrow-down-wide-line"></i>
       </h5>
-      <div>
-        
+      <div className="flex  items-center justify-between ">
+   <img
+          className="h-12"
+          src="https://cdn-icons-png.flaticon.com/512/1839/1839365.png"
+          alt="worker"
+        />
+        <div>
+          <h2 className='text-lg font-medium'>Ahmed</h2>
+          <h4 className='text-xl font-semibold -Mt-1 -mb-2'>Electrician</h4>
+        </div>
+      
       </div>
 
       <div className="flex flex-col gap-2 justify-between items-center">

@@ -15,14 +15,18 @@ const Home = () => {
   const [workerPannel, setWorkerPannel] = useState(false);
   const [confirmedWorkerPanel, setConfirmedWorkerPanel] = useState(false);
  const[workerFound, setWorkerFound] = useState(false);
- 
+  const [waitingForWorker, setWaitingForWorker] = useState(false);
+
+
  const panelRef = useRef(null);
   const panelCloseRef = useRef(null);
   const workerPannelRef = useRef(null);
   const logoRef = useRef(null);
   const confirmedWorkerRef = useRef(null);
   const workerFoundRef = useRef(null);
+ const waitingForWorkerRef = useRef(null);
 
+  // Handler for form submission
   const submitHandler = (e) => {
     e.preventDefault();
     console.log("Form submitted");
@@ -69,6 +73,15 @@ const Home = () => {
       ease: "power2.inOut",
     });
   }, [workerFound]);
+
+  useGSAP(() => {
+    gsap.to(waitingForWorkerRef.current, {
+      y: waitingForWorker ? 0 : "100%",
+      duration: 0.5,
+      ease: "power2.inOut",
+    });
+  }, [waitingForWorker]);
+
 
   const services = [
     {
@@ -181,10 +194,10 @@ const Home = () => {
       </div>
 
             <div
-        
+           ref={waitingForWorkerRef}
         className="fixed bottom-0  w-full z-20 p-3 pb-6 py-8 pt-12 bg-white"
       >
-        <WaitingForWorker   />
+        <WaitingForWorker waitingForWorker={waitingForWorker}   />
       </div>
 
 

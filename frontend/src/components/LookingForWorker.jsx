@@ -1,6 +1,6 @@
 import React from "react";
 
-const LookingForWorker = () => {
+const LookingForWorker = (props) => {
   return (
     <div>
       <h5
