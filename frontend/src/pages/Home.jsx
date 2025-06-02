@@ -117,6 +117,8 @@ const Home = () => {
       />
 
       <div className="h-screen w-screen absolute top-0 left-0 z-0">
+        
+         {/* Background Image temporary */}
         <img
           className="h-full w-full object-cover"
           src="https://miro.medium.com/v2/resize:fit:1400/0*gwMx05pqII5hbfmX.gif"

@@ -11,6 +11,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import WorkerHome from "./pages/WorkerHome";
 import WorkerProtectWrapper from "./pages/WorkerProtectWrapper";
 import WorkerLogout from "./pages/WorkerLogout";
+import Riding from "./pages/Riding";
 function App() {
   // ...
 
@@ -20,6 +21,7 @@ function App() {
         <Route path="/" element={<Start />} />
         <Route path="/userLogin" element={<UserLogin />} />
         <Route path="/SignUp" element={<UserSignUp />} />
+       <Route path="/Riding" element={<Riding />} />
         <Route path="/workerLogin" element={<WorkerLogin />} />
         <Route path="/workerSignUp" element={<WorkerSignUp />} />
         <Route path="/admin" element={<AdminDashboard />} />
