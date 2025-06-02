@@ -3,14 +3,25 @@ import { gsap } from "gsap";
 import { useGSAP } from "@gsap/react";
 import "remixicon/fonts/remixicon.css";
 import LocationSerachPannel from "../components/LocationSerachPannel";
+import WorkerPanel from "../components/WorkerPanel";
+import ConfirmedWorker from "../components/ConfirmedWorker";
+import LookingForWorker from "../components/LookingForWorker";
+import WaitingForWorker from "../components/WaitingForWorker";
 
 const Home = () => {
   const [pickup, setPickup] = useState("");
   const [destination, setDestination] = useState("");
   const [panelOpen, setPanelOpen] = useState(false);
-
-  const panelRef = useRef(null);
+  const [workerPannel, setWorkerPannel] = useState(false);
+  const [confirmedWorkerPanel, setConfirmedWorkerPanel] = useState(false);
+ const[workerFound, setWorkerFound] = useState(false);
+ 
+ const panelRef = useRef(null);
   const panelCloseRef = useRef(null);
+  const workerPannelRef = useRef(null);
+  const logoRef = useRef(null);
+  const confirmedWorkerRef = useRef(null);
+  const workerFoundRef = useRef(null);
 
   const submitHandler = (e) => {
     e.preventDefault();
@@ -28,7 +39,36 @@ const Home = () => {
       opacity: panelOpen ? 1 : 0,
       duration: 0.3,
     });
+
+    gsap.to(logoRef.current, {
+      opacity: panelOpen ? 0 : 1,
+      duration: 0.3,
+    });
   }, [panelOpen]);
+
+  useGSAP(() => {
+    gsap.to(workerPannelRef.current, {
+      y: workerPannel ? 0 : "100%",
+      duration: 0.5,
+      ease: "power2.inOut",
+    });
+  }, [workerPannel]);
+
+  useGSAP(() => {
+    gsap.to(confirmedWorkerRef.current, {
+      y: confirmedWorkerPanel ? 0 : "100%",
+      duration: 0.5,
+      ease: "power2.inOut",
+    });
+  }, [confirmedWorkerPanel]);
+
+  useGSAP(() => {
+    gsap.to(workerFoundRef.current, {
+      y: workerFound ? 0 : "100%",
+      duration: 0.5,
+      ease: "power2.inOut",
+    });
+  }, [workerFound]);
 
   const services = [
     {
@@ -52,28 +92,17 @@ const Home = () => {
       price: "Rs900",
       description: "Quality furniture repair & build",
     },
-    {
-      title: "Cleaner",
-      icon: "/Cleaner.png",
-      time: "1 min away",
-      price: "Rs600",
-      description: "Sparkling clean service",
-    },
-    {
-      title: "Painter",
-      icon: "/Painter.png",
-      time: "5 mins away",
-      price: "Rs850",
-      description: "Vibrant finish guaranteed",
-    },
   ];
 
   return (
     <div className="h-screen relative overflow-hidden">
-      <img className="w-16 absolute left-5 top-5 z-20" src="/image.png" alt="Logo" />
+      <img
+        ref={logoRef}
+        className="w-16 absolute left-5 top-5 z-20 transition-opacity duration-300"
+        src="/image.png"
+        alt="Logo"
+      />
 
-      {/* Background */}
-      
       <div className="h-screen w-screen absolute top-0 left-0 z-0">
         <img
           className="h-full w-full object-cover"
@@ -82,7 +111,6 @@ const Home = () => {
         />
       </div>
 
-      {/* Main content */}
       <div className="flex flex-col justify-end items-center h-screen absolute top-0 w-full z-10">
         <div className="h-[30%] p-5 bg-white relative w-full">
           <h5
@@ -117,39 +145,49 @@ const Home = () => {
           </form>
         </div>
 
-        {/* Sliding Panel */}
         <div
           ref={panelRef}
           className="overflow-hidden w-full bg-white text-black pl-5"
           style={{ height: 0 }}
         >
-          <LocationSerachPannel />
+          <LocationSerachPannel setPanelOpen={setPanelOpen} setWorkerPannel={setWorkerPannel} />
         </div>
       </div>
 
-      {/* Bottom Service Panel */}
-      <div className="fixed bottom-0 translate-y-full w-full  z-20 p-3 pb-6 bg-white">
-        <h3 className="text-2xl font-semibold mb-3">Choose a Service</h3>
+      <div
+        ref={workerPannelRef}
+        className="fixed bottom-0 translate-y-full w-full z-20 p-3 pb-6 pt-12 bg-white"
+      >
+        <WorkerPanel
+          services={services}
+          setWorkerPannel={setWorkerPannel}
+          setConfirmedWorkerPanel={setConfirmedWorkerPanel}
+        />
+      </div>
 
-        <div className="space-y-4">
-          {services.map((service, idx) => (
+      <div
+        ref={confirmedWorkerRef}
+        className="fixed bottom-0 translate-y-full w-full z-20 p-3 pb-6 py-8 pt-12 bg-white"
+      >
+        <ConfirmedWorker setConfirmedWorkerPanel={setConfirmedWorkerPanel} setWorkerFound = {setWorkerFound} />
+      </div>
+
+      
+      <div
+        ref={workerFoundRef}
+        className="fixed bottom-0 translate-y-full w-full z-20 p-3 pb-6 py-8 pt-12 bg-white"
+      >
+        <LookingForWorker setWorkerFound = {setWorkerFound}  />
+      </div>
+
             <div
-              key={idx}
-              className="flex border active:border-black bg-grey rounded-xl w-full p-3 shadow-md items-center justify-between"
-            >
-              <img className="h-12" src={service.icon} alt={service.title} />
-              <div className="w-1/2 pl-3 ml-3">
-                <h4 className="font-medium text-base">
-                  {service.title} <i className="ri-user-3-line ml-1">1</i>
-                </h4>
-                <h5 className="font-medium text-sm">{service.time}</h5>
-                <p className="font-normal text-xs text-gray-600">{service.description}</p>
-              </div>
-              <h2 className="text-xl font-semibold">{service.price}</h2>
-            </div>
-          ))}
-        </div>
+        
+        className="fixed bottom-0  w-full z-20 p-3 pb-6 py-8 pt-12 bg-white"
+      >
+        <WaitingForWorker   />
       </div>
+
+
     </div>
   );
 };
