@@ -54,6 +54,7 @@ const workerSchema = new mongoose.Schema({
         required: true,
         match: [/^\+?\d{10,15}$/, 'Enter a valid phone number'],
     }
+    
 }, { timestamps: true });
 
 // 🔐 Auto-hash password before saving

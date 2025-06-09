@@ -12,8 +12,11 @@ import WorkerHome from "./pages/WorkerHome";
 import WorkerProtectWrapper from "./pages/WorkerProtectWrapper";
 import WorkerLogout from "./pages/WorkerLogout";
 import Riding from "./pages/Riding";
+import WorkerServicing from "./pages/WorkerServicing";
+import 'remixicon/fonts/remixicon.css'
+
 function App() {
-  // ...
+  
 
   return (
     <div>
@@ -22,6 +25,7 @@ function App() {
         <Route path="/userLogin" element={<UserLogin />} />
         <Route path="/SignUp" element={<UserSignUp />} />
        <Route path="/Riding" element={<Riding />} />
+       <Route path="/Worker-Servicing" element={<WorkerServicing/>} />
         <Route path="/workerLogin" element={<WorkerLogin />} />
         <Route path="/workerSignUp" element={<WorkerSignUp />} />
         <Route path="/admin" element={<AdminDashboard />} />
@@ -57,7 +61,12 @@ function App() {
               <WorkerLogout />
             </WorkerProtectWrapper>
           }
+
+
+          
         />
+
+
       </Routes>
     </div>
   );
