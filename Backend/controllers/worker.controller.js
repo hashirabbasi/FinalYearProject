@@ -12,6 +12,7 @@ exports.registerWorker = async (req, res) => {
   if (existing) return res.status(400).json({ message: "Worker already exists" });
 
   const {
+
     firstname,
     lastname,
     email,
@@ -92,3 +93,102 @@ exports.logoutWorker = async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+
+// POST /api/auth/verify
+module.exports.verifyOTP = async (req, res) => {
+    const { email, otp } = req.body;
+
+    try {
+        const worker = await workerModel.findOne({ email });
+
+        if (!worker) return res.status(400).json({ error: "Worker not found" });
+        if (worker.isVerified) return res.status(400).json({ error: "Worker already verified" });
+
+        if (worker.otp !== otp || worker.otpExpiresAt < new Date()) {
+            return res.status(400).json({ error: "Invalid or expired OTP" });
+        }
+
+        worker.isVerified = true;
+        worker.otp = "You have verified your email";
+        worker.otpExpiresAt = null;
+        await worker.save();
+
+        res.status(200).json({ message: "Email verified successfully. You can now log in." });
+    } catch (error) {
+        console.error("Error verifying OTP:", error);
+        res.status(500).json({ error: "Internal server error" });
+    }
+};
+
+module.exports.forgetPassword = async (req, res) => {
+    const { email } = req.body;
+
+    if (!email) {
+        return res.status(400).json({ error: "Email is required" });
+    }
+
+    // check if a worker exists with this email
+    const worker = await worker.findOne({ email })
+    if (!worker) {
+        return res.status(400).json({ error: "worker not found" })
+    }
+
+    // generate an OTP and set it in DB
+    
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otpExpires = new Date(Date.now() + 10 * 60 * 1000);
+    worker.otp = otp;
+    worker.otpExpires = otpExpires;
+    // send otp
+    sendOTP(email, otp)
+
+    worker.save()     // save the otp in the DB
+    res.json({
+        email: email,
+        message: "Otp sent on email"
+    })
+}
+
+module.exports.resetPassword = async (req, res) => {
+    try {
+        const { otp, newPassword, confirmNewPassword } = req.body;
+
+        if (!otp || !newPassword || !confirmNewPassword) {
+            return res.status(400).json({ error: "All fields are required" })
+        }
+
+        // matching the otp
+        const worker = await worker.findOne({ otp });            // dubious
+        if (!worker){
+            return res.status(400).json({error: "Invalid or expired OTP"})
+        }
+
+        if (worker.otp != otp) {
+            return res.status(400).json({ error: "OTP didn't match" })
+        }
+
+        // check if new password and confirm new password match
+        if (newPassword != confirmNewPassword) {
+            return res.status(400).json({ error: "new password and confirm new password doesn't match" })
+        }
+
+        // update and save the new passowrd in the daatabae
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(newPassword, salt);
+        worker.password = hashedPassword;
+        
+        // remove the otp and otpExpiresAt from db
+        worker.otp = null;
+        worker.otpExpiresAt = null;
+
+        await worker.save()
+
+        res.json({      // test response
+            message: "Password changed successfully"
+        })
+
+    } catch (error) {
+        console.log(error)
+    }
+}
+

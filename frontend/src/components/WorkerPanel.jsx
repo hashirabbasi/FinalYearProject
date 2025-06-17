@@ -1,6 +1,14 @@
 import React from "react";
 
-const WorkerPanel = ({ services, setWorkerPannel,setConfirmedWorkerPanel }) => {
+const WorkerPanel = ({
+  services,
+  setWorkerPannel,
+  setConfirmedWorkerPanel,
+  createRide,
+  selectedService,
+  selectedHours,
+  destination
+}) => {
   return (
     <div>
       <h5
@@ -11,13 +19,20 @@ const WorkerPanel = ({ services, setWorkerPannel,setConfirmedWorkerPanel }) => {
       </h5>
       <h3 className="text-2xl font-semibold mb-3">Choose a Service</h3>
 
-      <div onClick={()=>{
-        setConfirmedWorkerPanel(true);
-      }} className="space-y-4">
+      <div className="space-y-4">
         {services.map((service, idx) => (
           <div
             key={idx}
-            className="flex border active:border-black bg-grey rounded-xl w-full p-3 shadow-md items-center justify-between"
+            onClick={() => {
+              createRide(
+                selectedService || service.serviceType,
+                selectedHours,
+                destination
+              );
+              setConfirmedWorkerPanel(true);
+              setWorkerPannel(false);
+            }}
+            className="flex border active:border-black bg-grey rounded-xl w-full p-3 shadow-md items-center justify-between cursor-pointer"
           >
             <img className="h-12" src={service.icon} alt={service.title} />
             <div className="w-1/2 pl-3 ml-3">
@@ -29,7 +44,6 @@ const WorkerPanel = ({ services, setWorkerPannel,setConfirmedWorkerPanel }) => {
                 {service.description}
               </p>
             </div>
-            <h2 className="text-xl font-semibold">{service.price}</h2>
           </div>
         ))}
       </div>

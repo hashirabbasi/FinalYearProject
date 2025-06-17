@@ -136,21 +136,21 @@ const Home = () => {
       title: "Electrician",
       icon: "/Electrician.png",
       time: "2 mins away",
-      price: "Rs800",
+      price: "Rs500",
       description: "Affordable, compact service",
     },
     {
       title: "Plumber",
       icon: "/Plumber.png",
       time: "3 mins away",
-      price: "Rs700",
+      price: "Rs500",
       description: "Expert plumbing at your door",
     },
     {
       title: "Carpenter",
       icon: "/Carpenter.png",
       time: "4 mins away",
-      price: "Rs900",
+      price: "Rs500",
       description: "Quality furniture repair & build",
     },
   ];
@@ -164,7 +164,7 @@ const Home = () => {
         `${import.meta.env.VITE_BASE_URL}/rides/get-Fare`,
         {
           params: {
-            serviceType: "plumber", // <-- use a valid type here!
+            serviceType: "plumber", // or dynamically selected type
             hoursWorked: 1,
           },
           headers: {
@@ -173,12 +173,35 @@ const Home = () => {
         }
       );
 
-
-      console.log(response.data);
+      setFare(response.data.data); // <-- set the fare here
+      console.log(response.data.data);
     } catch (error) {
       console.error("Error fetching fare:", error);
     }
   }
+
+  async function createRide(serviceType) {
+
+      const response = await axios.post(
+          `${import.meta.env.VITE_BASE_URL}/rides/create`,
+          {
+            pickupLocation: pickup,
+            serviceType,
+            
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          }
+        )
+        
+        console.log(respose.data)
+
+    }
+
+    
+
 
   return (
     <div className="h-screen relative overflow-hidden">
@@ -249,6 +272,7 @@ const Home = () => {
         className="fixed bottom-0 translate-y-full w-full z-20 p-3 pb-6 pt-12 bg-white"
       >
         <WorkerPanel
+           createRide={createRide }
           services={services}
           fare = {fare}
           setWorkerPannel={setWorkerPannel}

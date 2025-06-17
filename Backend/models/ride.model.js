@@ -21,11 +21,12 @@ const rideSchema = new mongoose.Schema({
   hoursBooked: {
     type: Number,
     min: 1,
-    required: true
+    
   },
   fare: {
     type: Number,
     required: true
+  
   },
   orderId: {
     type: String,

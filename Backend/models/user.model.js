@@ -34,7 +34,12 @@ const userSchema = new mongoose.Schema({
         enum: ['user', 'admin'],
         default: 'user'
     },
-    
+    otp: { type: String },
+    otpExpires: { type: Date },
+    isVerified: {
+        type: Boolean,
+        default: false
+    },
 });
 
 userSchema.methods.generateAuthToken = function () {

@@ -25,8 +25,11 @@ router.post("/login", [
   console.log("✅ /workers/login hit");
   next();
 }, workerController.loginWorker);
+router.post("/verify-otp", workerController.verifyOTP);
 
 router.get("/profile", authorizationMiddleware.authWorker, workerController.getWorkerProfile);
 router.get("/logout", authorizationMiddleware.authWorker, workerController.logoutWorker);
+router.post("/forgetPassword", workerController.forgetPassword);
+router.post("/resetPassword",  workerController.resetPassword);
 
 module.exports = router;

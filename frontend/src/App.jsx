@@ -13,6 +13,9 @@ import WorkerProtectWrapper from "./pages/WorkerProtectWrapper";
 import WorkerLogout from "./pages/WorkerLogout";
 import Riding from "./pages/Riding";
 import WorkerServicing from "./pages/WorkerServicing";
+import ForgotPassword from "./pages/ForgetPassword";
+import ResetPassword from "./pages/ResetPassword";
+import VerifyOTP from "./pages/VerifyOTP";
 import 'remixicon/fonts/remixicon.css'
 
 function App() {
@@ -65,7 +68,9 @@ function App() {
 
           
         />
-
+        <Route path="/users/forgot-password" element={<ForgotPassword />} />
+        <Route path="/users/reset-password" element={<ResetPassword />} />
+        <Route path="/users/verify-otp" element={<VerifyOTP />} />
 
       </Routes>
     </div>

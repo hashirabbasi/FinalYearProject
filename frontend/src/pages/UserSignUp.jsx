@@ -1,125 +1,146 @@
-import React from "react";
+import React, { useState, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useState } from "react";
 import axios from "axios";
-import { useContext } from "react";
 import { userDataContext } from "../context/UserContext";
+
 const UserSignUp = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [firstname, setFirstName] = useState("");
   const [lastname, setLastName] = useState("");
-  const [userDate, setUserDate] = useState({});
-
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const { setUser } = useContext(userDataContext);
   const navigate = useNavigate();
-  const { user, setUser } = useContext(userDataContext);
-console.log("Context value:", useContext(userDataContext));
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
+    setError("");
 
-  const newUser = {
-    fullName: {
-      firstname,
-      lastname,
-    },
-    email,
-    password,
+    if (password !== confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+
+    setLoading(true);
+
+    const newUser = {
+      fullName: {
+        firstname,
+        lastname,
+      },
+      email,
+      password,
+    };
+
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_BASE_URL}/users/register`,
+        newUser
+      );
+
+      if (response.status === 201) {
+        const data = response.data;
+        setUser(data.user);
+        localStorage.setItem("token", data.token);
+        navigate("/Home");
+      }
+    } catch (error) {
+      setError("Failed to register. Please try again.");
+    }
+    setLoading(false);
+    setEmail("");
+    setPassword("");
+    setConfirmPassword("");
+    setFirstName("");
+    setLastName("");
   };
 
-  try {
-    const response = await axios.post(`${import.meta.env.VITE_BASE_URL}/users/register`, newUser);
-
-    if (response.status === 201) {
-      const data = response.data;
-      setUser(data.user);
-      localStorage.setItem("token", data.token);
-      navigate('/Home');
-    }
-  } catch (error) {
-    console.error("Registration error:", error);
-    alert("Failed to register. Please try again.");
-  }
-
-  setEmail("");
-  setPassword("");
-  setFirstName("");
-  setLastName("");
-};
-
   return (
-    <div className="p-7 h-screen flex flex-col justify-between ">
-      <div>
-        <img className=" w-16 mb-10" src="image.png" alt="" />
-
-        <form
-          onSubmit={(e) => {
-            handleSubmit(e);
-          }}
-        >
-          <h3 className="text-base font-medium mb-2">what's your name</h3>
-          <div className="flex gap-4 mb-5 ">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-gray-100">
+      <div className="w-full max-w-lg bg-white rounded-2xl shadow-2xl p-10">
+        <div className="flex flex-col items-center mb-8">
+          <img
+            className="w-16 h-16 mb-2 rounded-full shadow"
+            src="/image.png"
+            alt="Logo"
+          />
+          <h1 className="text-3xl font-bold text-[#153a54] mb-2 tracking-tight">
+            Create Your Account
+          </h1>
+          <p className="text-gray-500 text-sm text-center">
+            Sign up to get started with Sahulat!
+          </p>
+        </div>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="flex gap-4">
             <input
               type="text"
-              placeholder="Enter your First name"
-              required
+              placeholder="First Name"
               value={firstname}
               onChange={(e) => setFirstName(e.target.value)}
-              className="bg-[#eeeeee] w-1/2  rounded px-4 py-2 border  text-base placeholder:text-base"
+              className="border px-4 py-2 w-1/2 rounded"
+              required
             />
             <input
               type="text"
-              placeholder="Enter your Last name"
-              required
+              placeholder="Last Name"
               value={lastname}
               onChange={(e) => setLastName(e.target.value)}
-              className="bg-[#eeeeee] w-1/2  rounded px-4 py-2 border  text-base placeholder:text-base"
+              className="border px-4 py-2 w-1/2 rounded"
+              required
             />
           </div>
-
-          <h3 className="text-base font-medium mb-2">what's your email</h3>
-
           <input
             type="email"
-            placeholder="Enter your email"
-            required
+            placeholder="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="bg-[#eeeeee] mb-5 rounded px-4 py-2 border w-full text-base placeholder:text-base"
+            className="border px-4 py-2 w-full rounded"
+            required
           />
-
-          <h3 className="text-base font-medium mb-2">what's your password</h3>
           <input
             type="password"
-            placeholder="Enter your password"
-            required
+            placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="bg-[#eeeeee] mb-5 rounded px-4 py-2 border w-full text-base placeholder:text-base"
+            className="border px-4 py-2 w-full rounded"
+            required
           />
-          <button className="bg-[#111] text-white font-semibold mb-3 rounded px-4 py-2  w-full text-lg ">
-           Create Account
+          <input
+            type="password"
+            placeholder="Confirm Password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            className="border px-4 py-2 w-full rounded"
+            required
+          />
+          {error && (
+            <div className="text-red-600 text-center text-sm">{error}</div>
+          )}
+          <button
+            type="submit"
+            className="bg-[#111] text-white font-semibold rounded px-4 py-2 w-full text-lg transition hover:bg-[#153a54]"
+            disabled={loading}
+          >
+            {loading ? "Creating Account..." : "Create Account"}
           </button>
         </form>
-        <p className="text-center">
-          already have an account?{" "}
-          <Link to="/UserLogin" className="text-blue-600">
-            <b> Login here </b>
+        <p className="text-center mt-4">
+          Already have an account?{" "}
+          <Link
+            to="/UserLogin"
+            className="text-blue-600 font-bold hover:underline"
+          >
+            Login here
           </Link>
         </p>
-      </div>
-
-      <div>
-        <p className="text-[8px] leading-tight">
-          {" "}
-          Lorem Lorem ipsum, dolor sit amet consectetur adipisicing elit.
-          Officiis omnis magni quae vitae porro error modi ipsum, est illo
-          nostrum! Eaque adipisci illum ea. Dolor itaque harum corrupti quis
-          et.ipsum, dolor sit amet consectetur adipisicing elit. Unde omnis
-          veritatis eligendi sit totam ab saepe voluptates! Aperiam adipisci
-          deserunt molestiae! Excepturi eaque laborum hic nam! Quam eius nisi
-          ullam.
-        </p>
+        <div className="mt-4">
+          <p className="text-[10px] text-center leading-tight text-gray-600">
+            By signing up, you agree to our terms and conditions.
+          </p>
+        </div>
       </div>
     </div>
   );
