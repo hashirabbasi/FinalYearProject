@@ -49,11 +49,20 @@ const workerSchema = new mongoose.Schema({
         min: [0, 'Experience must be a non-negative number'],
         required: true,
     },
+       
+   hourlyRate: {
+    type: Number,
+    required: true,
+    min: [300, 'Hourly rate must be at least 100'], // optional min value
+},
     phone: {
         type: String,
         required: true,
         match: [/^\+?\d{10,15}$/, 'Enter a valid phone number'],
-    }
+    },
+ 
+
+
     
 }, { timestamps: true });
 

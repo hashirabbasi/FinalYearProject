@@ -1,6 +1,7 @@
 import React, { useRef, useState } from "react";
 import { gsap } from "gsap";
 import { useGSAP } from "@gsap/react";
+import axios from "axios";
 import "remixicon/fonts/remixicon.css";
 import LocationSerachPannel from "../components/LocationSerachPannel";
 import WorkerPanel from "../components/WorkerPanel";
@@ -14,17 +15,65 @@ const Home = () => {
   const [panelOpen, setPanelOpen] = useState(false);
   const [workerPannel, setWorkerPannel] = useState(false);
   const [confirmedWorkerPanel, setConfirmedWorkerPanel] = useState(false);
- const[workerFound, setWorkerFound] = useState(false);
+  const [workerFound, setWorkerFound] = useState(false);
   const [waitingForWorker, setWaitingForWorker] = useState(false);
+  const [fare, setFare] = useState({});
 
+  // New state for suggestions and active field
+  const [suggestions, setSuggestions] = useState([]);
+  const [activeField, setActiveField] = useState(""); // "pickup" or "destination"
 
- const panelRef = useRef(null);
+  const panelRef = useRef(null);
   const panelCloseRef = useRef(null);
   const workerPannelRef = useRef(null);
   const logoRef = useRef(null);
   const confirmedWorkerRef = useRef(null);
   const workerFoundRef = useRef(null);
- const waitingForWorkerRef = useRef(null);
+  const waitingForWorkerRef = useRef(null);
+
+  // Fetch suggestions from backend
+  const fetchSuggestions = async (query) => {
+    if (!query || query.length < 3) {
+      setSuggestions([]);
+      return;
+    }
+    try {
+      const token = localStorage.getItem("token");
+      const res = await axios.get(
+        `${import.meta.env.VITE_BASE_URL}/maps/get-suggestions`,
+        {
+          params: { query },
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      setSuggestions(res.data.data || []);
+    } catch (err) {
+      setSuggestions([]);
+    }
+  };
+
+  // Handler for input changes
+  const handleInputChange = (field, value) => {
+    if (field === "pickup") {
+      setPickup(value);
+      setActiveField("pickup");
+    } else {
+      setDestination(value);
+      setActiveField("destination");
+    }
+    setPanelOpen(true);
+    fetchSuggestions(value);
+  };
+
+  // Handler for suggestion click
+  const handleSuggestionClick = (suggestion) => {
+    if (activeField === "pickup") {
+      setPickup(suggestion);
+    } else {
+      setDestination(suggestion);
+    }
+   
+  };
 
   // Handler for form submission
   const submitHandler = (e) => {
@@ -82,7 +131,6 @@ const Home = () => {
     });
   }, [waitingForWorker]);
 
-
   const services = [
     {
       title: "Electrician",
@@ -107,6 +155,31 @@ const Home = () => {
     },
   ];
 
+  async function findWorker() {
+    setWorkerPannel(true);
+    setPanelOpen(false);
+
+    try {
+      const response = await axios.get(
+        `${import.meta.env.VITE_BASE_URL}/rides/get-Fare`,
+        {
+          params: {
+            serviceType: "plumber", // <-- use a valid type here!
+            hoursWorked: 1,
+          },
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        }
+      );
+
+
+      console.log(response.data);
+    } catch (error) {
+      console.error("Error fetching fare:", error);
+    }
+  }
+
   return (
     <div className="h-screen relative overflow-hidden">
       <img
@@ -117,8 +190,7 @@ const Home = () => {
       />
 
       <div className="h-screen w-screen absolute top-0 left-0 z-0">
-        
-         {/* Background Image temporary */}
+        {/* Background Image temporary */}
         <img
           className="h-full w-full object-cover"
           src="https://miro.medium.com/v2/resize:fit:1400/0*gwMx05pqII5hbfmX.gif"
@@ -138,34 +210,37 @@ const Home = () => {
 
           <h4 className="text-3xl font-semibold">Find a Worker</h4>
 
-          <form onSubmit={submitHandler}>
-            <div className="absolute h-16 w-1 top-[45%] left-10 bg-gray-700 rounded-full" />
-
+          <form onSubmit={(e) => e.preventDefault()}>
             <input
-              onClick={() => setPanelOpen(true)}
+              onFocus={() => setActiveField("pickup")}
               value={pickup}
-              onChange={(e) => setPickup(e.target.value)}
+              onChange={(e) => handleInputChange("pickup", e.target.value)}
               className="bg-[#eeeeee] px-12 py-2 text-lg rounded-lg w-full mt-5"
               type="text"
               placeholder="Add a pickup location"
-            />
-
-            <input
-              value={destination}
-              onChange={(e) => setDestination(e.target.value)}
-              className="bg-[#eeeeee] px-11 py-2 text-lg rounded-lg w-full mt-3"
-              type="text"
-              placeholder="Enter your destination"
+              autoComplete="off"
             />
           </form>
+
+          <button
+            onClick={findWorker}
+            className="bg-black text-white px-4 py-2 rounded-lg mt-4 w-full"
+          >
+            Find Worker
+          </button>
         </div>
 
         <div
           ref={panelRef}
           className="overflow-hidden w-full bg-white text-black pl-5"
-          style={{ height: 0 }}
+          style={{ height: panelOpen ? "auto" : 0 }}
         >
-          <LocationSerachPannel setPanelOpen={setPanelOpen} setWorkerPannel={setWorkerPannel} />
+          <LocationSerachPannel
+            suggestions={suggestions}
+            onSuggestionClick={handleSuggestionClick}
+            setPanelOpen={setPanelOpen}
+            setWorkerPannel={setWorkerPannel}
+          />
         </div>
       </div>
 
@@ -175,6 +250,7 @@ const Home = () => {
       >
         <WorkerPanel
           services={services}
+          fare = {fare}
           setWorkerPannel={setWorkerPannel}
           setConfirmedWorkerPanel={setConfirmedWorkerPanel}
         />
@@ -184,25 +260,25 @@ const Home = () => {
         ref={confirmedWorkerRef}
         className="fixed bottom-0 translate-y-full w-full z-20 p-3 pb-6 py-8 pt-12 bg-white"
       >
-        <ConfirmedWorker setConfirmedWorkerPanel={setConfirmedWorkerPanel} setWorkerFound = {setWorkerFound} />
+        <ConfirmedWorker
+          setConfirmedWorkerPanel={setConfirmedWorkerPanel}
+          setWorkerFound={setWorkerFound}
+        />
       </div>
 
-      
       <div
         ref={workerFoundRef}
         className="fixed bottom-0 translate-y-full w-full z-20 p-3 pb-6 py-8 pt-12 bg-white"
       >
-        <LookingForWorker setWorkerFound = {setWorkerFound}  />
+        <LookingForWorker setWorkerFound={setWorkerFound} />
       </div>
 
-            <div
-           ref={waitingForWorkerRef}
-        className="fixed bottom-0  w-full z-20 p-3 pb-6 py-8 pt-12 bg-white"
+      <div
+        ref={waitingForWorkerRef}
+        className="fixed bottom-0 w-full z-20 p-3 pb-6 py-8 pt-12 bg-white"
       >
-        <WaitingForWorker waitingForWorker={waitingForWorker}   />
+        <WaitingForWorker waitingForWorker={waitingForWorker} />
       </div>
-
-
     </div>
   );
 };
